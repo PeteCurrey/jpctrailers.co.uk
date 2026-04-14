@@ -3,12 +3,13 @@ import { notFound } from 'next/navigation'
 import SectionLabel from '@/components/ui/SectionLabel'
 import Button from '@/components/ui/Button'
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const supabase = createServerClient()
   const { data: post } = await supabase
     .from('journal_posts')
     .select('title, excerpt')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
 
   if (!post) return {}
@@ -19,12 +20,13 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default async function JournalPostPage({ params }: { params: { slug: string } }) {
+export default async function JournalPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const supabase = createServerClient()
   const { data: post } = await supabase
     .from('journal_posts')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
 
   if (!post) notFound()
@@ -103,7 +105,7 @@ export default async function JournalPostPage({ params }: { params: { slug: stri
           {/* Footer Navigation */}
           <div className="mt-32 pt-12 border-t border-[#1E1E1E] flex justify-between items-center">
              <div>
-                <Button href="/journal" variant="outline" size="sm">
+                <Button href="/journal" variant="outline">
                   ← Back to Journal
                 </Button>
              </div>

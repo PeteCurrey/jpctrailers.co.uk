@@ -7,21 +7,27 @@ function cn(...inputs: ClassValue[]) {
 }
 
 interface ButtonProps {
-  href: string
+  href?: string
+  onClick?: () => void
+  type?: 'button' | 'submit' | 'reset'
   children: React.ReactNode
   variant?: 'solid' | 'outline'
-  size?: 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg'
   className?: string
+  disabled?: boolean
 }
 
 export default function Button({ 
   href, 
+  onClick,
+  type = 'button',
   children, 
   variant = 'solid', 
   size = 'md',
-  className 
+  className,
+  disabled
 }: ButtonProps) {
-  const baseStyles = "inline-flex items-center justify-center font-mono text-[10px] tracking-[0.2em] transition-all duration-300"
+  const baseStyles = "inline-flex items-center justify-center font-mono text-[10px] tracking-[0.2em] transition-all duration-300 disabled:opacity-50"
   
   const variants = {
     solid: "bg-[#E8500A] text-white hover:bg-white hover:text-black",
@@ -29,16 +35,31 @@ export default function Button({
   }
   
   const sizes = {
+    sm: "px-4 py-2",
     md: "px-8 py-4",
     lg: "px-12 py-6"
   }
 
+  const combinedClasses = cn(baseStyles, variants[variant], sizes[size], className)
+
+  if (href) {
+    return (
+      <Link href={href} className={combinedClasses}>
+        {children}
+      </Link>
+    )
+  }
+
   return (
-    <Link 
-      href={href} 
-      className={cn(baseStyles, variants[variant], sizes[size], className)}
+    <button 
+      type={type}
+      onClick={onClick} 
+      className={combinedClasses}
+      disabled={disabled}
     >
       {children}
-    </Link>
+    </button>
   )
 }
+
+

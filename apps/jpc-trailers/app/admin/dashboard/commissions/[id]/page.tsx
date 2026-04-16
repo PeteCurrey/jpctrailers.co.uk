@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { use, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import SectionLabel from '@/components/ui/SectionLabel'
@@ -8,7 +8,7 @@ import Button from '@/components/ui/Button'
 import Link from 'next/link'
 
 export default function CommissionDetail({ params }: { params: Promise<{ id: string }> }) {
-  const unwrappedParams = use(params)
+  const { id } = use(params)
   const [commission, setCommission] = useState<any>(null)
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -18,19 +18,17 @@ export default function CommissionDetail({ params }: { params: Promise<{ id: str
     const fetchData = async () => {
       setIsLoading(true)
       
-      // Fetch the commission details
       const { data: commData, error: commError } = await supabase
         .from('commissions')
         .select('*')
-        .eq('id', unwrappedParams.id)
+        .eq('id', id)
         .single()
         
       if (commError || !commData) {
-        // Fallback to checking the old commission_requests table
         const { data: oldCommData } = await supabase
           .from('commission_requests')
           .select('*')
-          .eq('id', unwrappedParams.id)
+          .eq('id', id)
           .single()
           
         if (oldCommData) {
@@ -39,7 +37,6 @@ export default function CommissionDetail({ params }: { params: Promise<{ id: str
       } else {
         setCommission(commData)
         
-        // If there's a config_ref, fetch the configuration data
         if (commData.config_ref) {
           const { data: configData } = await supabase
             .from('saved_configs')
@@ -57,7 +54,7 @@ export default function CommissionDetail({ params }: { params: Promise<{ id: str
     }
 
     fetchData()
-  }, [unwrappedParams.id])
+  }, [id])
 
   if (isLoading) return (
     <div className="min-h-screen bg-[#080808] flex items-center justify-center">
@@ -75,7 +72,6 @@ export default function CommissionDetail({ params }: { params: Promise<{ id: str
   return (
     <main className="min-h-screen bg-[#080808] p-6 lg:p-12">
       <div className="max-w-[1200px] mx-auto w-full">
-        {/* Header */}
         <div className="mb-12">
           <Link href="/admin/dashboard" className="text-[#888] font-mono text-xs hover:text-white transition-colors mb-8 inline-block uppercase tracking-widest">
             ← Command Centre
@@ -95,7 +91,6 @@ export default function CommissionDetail({ params }: { params: Promise<{ id: str
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content (Specs) */}
           <div className="lg:col-span-2 space-y-12">
             
             {config ? (
@@ -188,7 +183,6 @@ export default function CommissionDetail({ params }: { params: Promise<{ id: str
               </section>
             )}
 
-            {/* Client Note */}
             {(commission.message || commission.dimensions_notes) && (
               <section>
                 <h2 className="text-xl font-syne font-bold uppercase mb-6 text-[#F0F0F0] border-l-2 border-[#1E1E1E] pl-4">Additional Notes</h2>
@@ -202,7 +196,6 @@ export default function CommissionDetail({ params }: { params: Promise<{ id: str
 
           </div>
 
-          {/* Sidebar (Actions & Status) */}
           <div className="space-y-6">
             <div className="bg-[#111] border border-[#1E1E1E] p-6">
               <span className="font-mono text-[10px] text-[#444] uppercase tracking-widest block mb-4">Lead Status</span>

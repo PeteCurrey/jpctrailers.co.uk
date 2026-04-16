@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import SectionLabel from '@/components/ui/SectionLabel'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
 
-export default function CommissionDetail({ params }: { params: { id: string } }) {
+export default function CommissionDetail({ params }: { params: Promise<{ id: string }> }) {
+  const unwrappedParams = use(params)
   const [commission, setCommission] = useState<any>(null)
   const [config, setConfig] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -21,7 +22,7 @@ export default function CommissionDetail({ params }: { params: { id: string } })
       const { data: commData, error: commError } = await supabase
         .from('commissions')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', unwrappedParams.id)
         .single()
         
       if (commError || !commData) {
@@ -29,7 +30,7 @@ export default function CommissionDetail({ params }: { params: { id: string } })
         const { data: oldCommData } = await supabase
           .from('commission_requests')
           .select('*')
-          .eq('id', params.id)
+          .eq('id', unwrappedParams.id)
           .single()
           
         if (oldCommData) {
@@ -56,7 +57,7 @@ export default function CommissionDetail({ params }: { params: { id: string } })
     }
 
     fetchData()
-  }, [params.id])
+  }, [unwrappedParams.id])
 
   if (isLoading) return (
     <div className="min-h-screen bg-[#080808] flex items-center justify-center">
